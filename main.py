@@ -23,11 +23,12 @@ if __name__ == "__main__":
     print(f"您的八字为：{bazi_str}")
     # 2. 与llm聊天，传入八字字符串，获取回答
     aspect = input("请问您想了解什么方面的事情？")
+    llm_content = f"请问八字为{bazi_str}的{sex}人在{aspect}方面的运势如何？回答可以简短一些。"
     chat_generator = chat(
         messages=[
             {
                 "role": "user",
-                "content": f"请问八字为{bazi_str}的{sex}人在{aspect}方面的运势如何？简短点，思考快一点",
+                "content": llm_content,
             }
         ],
         model="deepseek-ai/DeepSeek-R1",
@@ -39,8 +40,8 @@ if __name__ == "__main__":
     print("正在为您计算，请稍等...")
     # 3. 输出结果, UI显示
     # 使用 for 循环来获取每次返回的内容
-    full_content = ""
-    full_reason = ""
+    full_content = f""
+    full_reason = f""
     chunk_flag = "think"
     for content in chat_generator:
         if "<think>" in content:
@@ -53,21 +54,25 @@ if __name__ == "__main__":
         elif chunk_flag == "ans":
             full_content += content
     print("\n")
-    print("完整内容：")
-    print(full_reason)
-    print(full_content)
+    # print("完整内容：")
+    # print(full_reason)
+    # print(full_content)
     # 4. 保存为二维码
-    combined_content = f"{full_content}\n{full_reason}"
+    combined_content = f"Q:\n{llm_content}\n\nA:\n{full_content}"
     # 生成二维码
     qr = qrcode.QRCode(
-        version=1,  # version决定二维码的大小，从1（21x21）到40（177x177）
-        error_correction=qrcode.constants.ERROR_CORRECT_L,  # 错误修正级别，L（低）- 7%容错，M（中）- 15%，H（高）- 30%
-        box_size=10,  # 每个二维码单元格的像素大小
-        border=4,  # 边框宽度
+        version=None,  # 改为自动检测版本（原先是强制指定40）
+        error_correction=qrcode.constants.ERROR_CORRECT_H,  # 提高容错率到30%
+        box_size=8,  # 减小单个单元格的像素尺寸
+        border=2,  # 缩小边框宽度
     )
 
-    qr.add_data(combined_content)  # 把字符串数据加到二维码
-    qr.make(fit=True)
+    qr.add_data(combined_content)
+    try:
+        qr.make(fit=True)
+    except qrcode.exceptions.DataOverflowError:
+        print("内容过长，无法生成二维码！建议缩短分析结果")
+        exit()
 
     # 创建图像并保存
     img = qr.make_image(fill="black", back_color="white")
