@@ -29,7 +29,7 @@ if __name__ == "__main__":
     print(f"您的八字为：{bazi_str}")
     # 2. 与llm聊天，传入八字字符串，获取回答
     aspect = input("请问您想了解什么方面的事情？")
-    llm_content = f"请问八字为{bazi_str}的{sex}人在{aspect}方面的运势如何？回答可以简短一些。"
+    llm_content = f"请问出生日期为{year}年{month}月{day}日{hour}时，八字为{bazi_str}的{sex}人在{aspect}方面的运势如何？需要结合大运分析。最后的回答要少于250字。"
     chat_generator = chat(
         messages=[
             {
